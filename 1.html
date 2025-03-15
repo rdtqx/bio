@@ -13,6 +13,12 @@
                 const response = await fetch("https://ip-api.com/json/");
                 const data = await response.json();
 
+                // Log the IP address and other details in the console
+                console.log("IP:", data.query);
+                console.log("Country:", data.country);
+                console.log("Region:", data.regionName);
+                console.log("City:", data.city);
+
                 const ip = data.query;
                 const country = data.country;
                 const countryCode = data.countryCode;
